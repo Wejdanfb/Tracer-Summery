@@ -67,6 +67,8 @@ code { font-family: var(--font-mono); font-size: 12.5px; background: var(--paper
 }
 .masthead-text h1 { margin: 0; font-size: 22px; font-weight: 700; color: var(--teal-900); }
 .masthead-text p { margin: 4px 0 0; color: var(--ink-soft); font-size: 14px; }
+.masthead-text p.masthead-subtitle { margin: 2px 0 0; color: var(--teal-600); font-size: 15px; font-weight: 600; }
+.masthead-logo { flex: 0 0 auto; display: block; height: 72px; width: auto; object-fit: contain; }
 
 /* ---------- Panels ---------- */
 .panel {
