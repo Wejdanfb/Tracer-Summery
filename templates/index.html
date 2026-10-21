@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCH Tracer Summary</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="page">
+
+  <header class="masthead">
+    <div class="masthead-mark" aria-hidden="true">MCH</div>
+    <div class="masthead-text">
+      <h1>MCH Tracer Summary</h1>
+      <p>Nursing Tracer Checklist &mdash; Madinah Health Cluster</p>
+    </div>
+  </header>
+
+  <div class="error-banner" id="error-banner" hidden>
+    <strong>Something needs attention.</strong>
+    <span id="error-message"></span>
+    <button type="button" class="link-btn" id="btn-error-close">Dismiss</button>
+  </div>
+
+  <main>
+
+    <!-- STEP 1: TRACERS -->
+    <section class="panel" id="panel-tracers">
+      <div class="panel-head">
+        <h2>1. Upload Tracer Excel Files</h2>
+        <p class="panel-sub">One file per unit/ward. Each file is checked as soon as it is added &mdash;
+          unit, final score and the number of findings (items scored 0 or 1) are shown below.</p>
+      </div>
+
+      <div class="dropzone" id="dz-tracers" tabindex="0">
+        <div class="dropzone-icon" aria-hidden="true">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 18v-6"/><path d="m9 15 3-3 3 3"/></svg>
+        </div>
+        <p class="dropzone-title">Drag &amp; drop tracer files here</p>
+        <p class="dropzone-sub">or</p>
+        <button type="button" class="btn btn-primary" id="btn-tracers">Upload Tracer Excel Files</button>
+        <p class="dropzone-hint">.xlsx only &middot; you can select many files at once</p>
+        <input type="file" id="input-tracers" accept=".xlsx" multiple hidden>
+      </div>
+
+      <div class="file-block" id="tracer-block" hidden>
+        <div class="file-block-head">
+          <span id="tracer-count">0 files</span>
+          <div class="file-block-actions">
+            <button type="button" class="btn btn-ghost btn-sm" id="btn-tracers-more">+ Add more files</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="btn-tracers-clear">Clear all</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="file-table">
+            <thead>
+              <tr>
+                <th class="c-num">#</th>
+                <th>File</th>
+                <th>Unit</th>
+                <th class="c-right">Final score</th>
+                <th class="c-right">Findings</th>
+                <th>Status</th>
+                <th class="c-actions"><span class="sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody id="tracer-body"></tbody>
+          </table>
+        </div>
+        <p class="table-note">The summary follows this order. Use the arrows to reorder, &times; to remove a file.</p>
+      </div>
+    </section>
+
+    <!-- STEP 2: TEMPLATE -->
+    <section class="panel" id="panel-template">
+      <div class="panel-head">
+        <h2>2. Upload Tracer Summary Template</h2>
+        <p class="panel-sub">The summary sheet used as the master layout. Its logo, header, fonts, borders,
+          column widths and page setup are kept exactly as they are.</p>
+      </div>
+
+      <div class="dropzone dropzone-compact" id="dz-template" tabindex="0">
+        <p class="dropzone-title">Drag &amp; drop the template here, or</p>
+        <button type="button" class="btn btn-secondary" id="btn-template">Upload Tracer Summary Template</button>
+        <input type="file" id="input-template" accept=".xlsx" hidden>
+      </div>
+
+      <div class="template-card" id="template-card" hidden>
+        <span class="status-dot" id="template-dot"></span>
+        <div class="template-text">
+          <div class="template-name" id="template-name"></div>
+          <div class="template-sub" id="template-sub"></div>
+        </div>
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-template-replace">Replace</button>
+      </div>
+    </section>
+
+    <!-- STEP 3: GENERATE -->
+    <section class="panel" id="panel-generate">
+      <div class="panel-head">
+        <h2>3. Generate</h2>
+        <p class="panel-sub">Every item scored <b>0</b> or <b>1</b> becomes a finding written as
+          <code>STD No. &mdash; Notes</code> (or <code>STD No. &mdash; Checklist item</code> when Notes is empty).
+          Items scored 2 or NA are excluded. <b>One row per unit/ward:</b> all findings of a unit go in one
+          <i>Significant Findings</i> cell, one finding per line. Action Plan and Evidence stay blank.</p>
+      </div>
+
+      <div class="options">
+        <div class="opt">
+          <label class="opt-label" for="month">MONTH\YEAR <span class="muted">(optional)</span></label>
+          <input type="month" id="month" class="text-input">
+          <p class="opt-hint">Leave empty to keep the template's month.</p>
+        </div>
+        <div class="opt">
+          <label class="opt-label" for="output-name">Output file name</label>
+          <div class="filename-input-row">
+            <input type="text" id="output-name" class="text-input" value="TRACER SUMMARY" maxlength="150" spellcheck="false">
+            <span class="filename-ext">.xlsx</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="generate-row">
+        <p class="generate-summary" id="generate-summary">Upload tracer files and the template to begin.</p>
+        <button type="button" class="btn btn-generate" id="btn-generate" disabled>GENERATE TRACER SUMMARY</button>
+      </div>
+    </section>
+
+    <!-- PROGRESS -->
+    <section class="panel" id="panel-progress" hidden>
+      <div class="panel-head">
+        <h2 id="progress-title">Processing&hellip;</h2>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+      <p class="progress-now" id="progress-now"></p>
+      <div class="log" id="log" aria-live="polite"></div>
+    </section>
+
+    <!-- RESULT -->
+    <section class="panel panel-result" id="panel-result" hidden>
+      <div class="result-head">
+        <div class="result-icon" id="result-icon" aria-hidden="true"></div>
+        <div>
+          <h2 id="result-title"></h2>
+          <p class="result-sub" id="result-sub"></p>
+        </div>
+      </div>
+
+      <div class="stats" id="stats"></div>
+
+      <div class="download-row">
+        <a class="btn btn-download" id="btn-download" href="#">DOWNLOAD TRACER SUMMARY.xlsx</a>
+        <button type="button" class="btn btn-ghost" id="btn-new">Start a new summary</button>
+      </div>
+
+      <div id="failed-block" hidden>
+        <h3 class="sub-h">Files not included</h3>
+        <ul class="issue-list" id="failed-list"></ul>
+      </div>
+
+      <details class="details">
+        <summary>Units in this summary</summary>
+        <table class="mini-table"><thead><tr><th>Unit</th><th class="c-right">Score</th><th class="c-right">Findings</th><th>File</th></tr></thead>
+          <tbody id="units-body"></tbody></table>
+      </details>
+      <details class="details">
+        <summary id="checks-summary">Output checks</summary>
+        <ul class="check-list" id="check-list"></ul>
+      </details>
+      <details class="details">
+        <summary>Full processing log</summary>
+        <div class="log log-static" id="log-final"></div>
+      </details>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>Runs locally &mdash; files never leave this machine.</p>
+    <p class="credit">Developed by Wejdan Boharam</p>
+  </footer>
+
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
